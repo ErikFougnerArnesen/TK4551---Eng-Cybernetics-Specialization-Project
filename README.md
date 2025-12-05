@@ -24,10 +24,10 @@ You can watch the video [here](https://www.youtube.com/watch?v=8gKIP0OqHdQ).
 * Ubuntu 22.04
 * Python 3.10
 
-### Install ROS2 Humble on your computer
+### Installing ROS2 Humble on your computer
 To install ROS2 Humble follow the steps [here](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
 
-### Install Gazebo fortress on your computer
+### Installing Gazebo fortress on your computer
 To install Gazebo fortress follow the steps [here](https://gazebosim.org/docs/fortress/install_ubuntu/)
 
 
