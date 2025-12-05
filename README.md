@@ -18,11 +18,18 @@ You can watch the video [here](https://www.youtube.com/watch?v=8gKIP0OqHdQ).
 
 ### Prerequisites
 * ROS2 Humble
+* Gazebo Fortress
 * PX4 Autopilot
 * Micro XRCE-DDS Agent
 * px4_msgs
 * Ubuntu 22.04
 * Python 3.10
+
+### Install ROS2 Humble
+To install ROS2 Humble follow the steps [here](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
+
+### Install ROS2 Humble
+To install Gazebo fortress follow the steps [here](https://gazebosim.org/docs/fortress/install_ubuntu/)
 
 
 ## Setup Steps
@@ -42,27 +49,24 @@ bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
 You will now need to restart your computer before continuing.
 
 
-### Install ROS2 Humble
-To install ROS2 Humble follow the steps [here](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
+
 
 ### Install Dependencies
 
 Install Python dependencies as mentioned in the [PX4 Docs](https://docs.px4.io/main/en/ros/ros2_comm.html#install-ros-2) with this code
 
 ```
-pip3 install --user -U empy pyros-genmsg setuptools
+pip3 install --user -U pyros-genmsg
 ```
 
-I also found that without these packages installed Gazebo has issues loading
+I also found that without these packages installed Gazebo has issues with loading
 
 ```
-pip3 install kconfiglib
-pip install --user jsonschema
-pip install --user jinja2
+pip3 install --user kconfiglib jsonschema jinja2
 ```
 
 ### Build Micro DDS
-As mentioned in the [PX4 Docs](https://docs.px4.io/main/en/ros/ros2_comm.html#setup-micro-xrce-dds-agent-client) run this code in order to build MicroDDS on your machine
+As mentioned in the [PX4 Docs](https://docs.px4.io/main/en/ros/ros2_comm.html#setup-micro-xrce-dds-agent-client) we will need to run this code in order to build MicroDDS on your machine
 
 ```
 git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
@@ -198,5 +202,5 @@ then QGroundControl would run in a new tab of the terminal window and the QGroun
 If the vehicle does not arm when you press Enter, check to ensure the parameter NAV_DLL_ACT is set to 0. You may need to download QGroundControl and disable this parameter if you want to run this demo without needing QGC open.
 
 ## Questions
-Join the ARK Electronics Discord [here](https://discord.gg/TDJzJxUMRX) for more help and to stay up to date on our projects.
+Join the ARK Electronics Discord [here](https://discord.gg/TDJzJxUMRX) for more help and to stay up to date on their projects.
 
