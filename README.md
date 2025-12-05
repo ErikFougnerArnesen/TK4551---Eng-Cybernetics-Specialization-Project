@@ -1,19 +1,18 @@
 
-# ROS2_PX4_Offboard_Example
+# Overview
+This tutorial explains at a basic level how to use ROS2 and PX4 in order to control a simulated UAV's velocity with keyboard controls. The goal is to create a simple example that a complete beginner can follow and understand, even with no ROS2 or PX4 experience.
+
+This repo is a derivative of Braden Wagstaff's Offboard example
+https://github.com/ARK-Electronics/ROS2_PX4_Offboard_Example
+
+I've taken form his example and added some more functionality. 
+
+## ROS2_PX4_Offboard_Example
 The content of this tutorial was migrated to Custom Modes ad written in C++, you can find it below:
 [ros2_px4_teleop_example 🎛️](https://github.com/ARK-Electronics/ros2_px4_teleop_example/tree/main)
 
-## Overview
-This tutorial explains at a basic level how to use ROS2 and PX4 in order to control a simulated UAV's velocity with keyboard controls. The goal is to create a simple example that a complete beginner can follow and understand, even with no ROS2 or PX4 experience.
-
-This repo is a derivative of Jaeyoung Lim's Offboard example
-https://github.com/Jaeyoung-Lim/px4-offboard
-
-I've taken his example and added some functionality. 
-
 ## YouTube Tutorial
-We published a walkthrough tutorial on YouTube to demonstrate the example and to help beginners set up their enviornment. The video is helpful, but be sure to always defer to this Readme file for instructions. Some changes have been made since the video was posted, meaning that though it is helpful, it is not 100% accurate.
-
+Braden Wagstaff published a walkthrough tutorial on YouTube to demonstrate the example and to help beginners set up their enviornment. The video was super helpful, but be sure to always defer to this Readme file for instructions. Some changes have been made since the video was posted, meaning that though it is helpful, it is not 100% accurate.
 You can watch the video [here](https://www.youtube.com/watch?v=8gKIP0OqHdQ).
 
 ### Prerequisites
@@ -25,10 +24,10 @@ You can watch the video [here](https://www.youtube.com/watch?v=8gKIP0OqHdQ).
 * Ubuntu 22.04
 * Python 3.10
 
-### Install ROS2 Humble
+### Install ROS2 Humble on your computer
 To install ROS2 Humble follow the steps [here](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
 
-### Install ROS2 Humble
+### Install Gazebo fortress on your computer
 To install Gazebo fortress follow the steps [here](https://gazebosim.org/docs/fortress/install_ubuntu/)
 
 
@@ -53,7 +52,7 @@ You will now need to restart your computer before continuing.
 
 ### Install Dependencies
 
-Install Python dependencies as mentioned in the [PX4 Docs](https://docs.px4.io/main/en/ros/ros2_comm.html#install-ros-2) with this code
+Install Python dependencies as mentioned in the [PX4 Docs](https://docs.px4.io/main/en/ros/ros2_comm.html#install-ros-2) with the following commands
 
 ```
 pip3 install --user -U pyros-genmsg
@@ -66,7 +65,7 @@ pip3 install --user kconfiglib jsonschema jinja2
 ```
 
 ### Build Micro DDS
-As mentioned in the [PX4 Docs](https://docs.px4.io/main/en/ros/ros2_comm.html#setup-micro-xrce-dds-agent-client) we will need to run this code in order to build MicroDDS on your machine
+As in the [PX4 Docs](https://docs.px4.io/main/en/ros/ros2_comm.html#setup-micro-xrce-dds-agent-client) we will need to run this code in order to build MicroDDS on your machine
 
 ```
 git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
@@ -89,11 +88,11 @@ For more information on creating workspaces, see [here](https://docs.ros.org/en/
 Run this code to create a workspace in your home directory
 
 ```
-mkdir -p ~/ros2_px4_offboard_example_ws/src
-cd ~/ros2_px4_offboard_example_ws/src
+mkdir -p ~/ros2_px4_offboard_ws/src
+cd ~/ros2_px4_offboard_ws/src
 ```
 
-*ros2_px4_offboard_example_ws* is just a name I chose for the workspace. You can name it whatever you want. But after we run *colcon build* you might have issues changing your workspace name so choose wisely.
+*ros2_px4_offboard_ws* is just a name I chose for the workspace. You can name it whatever you want. But after we run *colcon build* you might have issues changing your workspace name so choose wisely.
 
 We are now in the src directory of our workspace. This is where ROS2 packages go, and is where we will clone in our two repos.
 
@@ -200,7 +199,4 @@ then QGroundControl would run in a new tab of the terminal window and the QGroun
 
 ## Known Issues
 If the vehicle does not arm when you press Enter, check to ensure the parameter NAV_DLL_ACT is set to 0. You may need to download QGroundControl and disable this parameter if you want to run this demo without needing QGC open.
-
-## Questions
-Join the ARK Electronics Discord [here](https://discord.gg/TDJzJxUMRX) for more help and to stay up to date on their projects.
 
