@@ -145,7 +145,7 @@ def main():
 
             twist = geometry_msgs.msg.Twist()
             
-            x_val = (x * speed) + x_val
+            x_val = (x * speed) + x_val 
             y_val = (y * speed) + y_val
             z_val = (z * speed) + z_val
             yaw_val = (th * turn) + yaw_val

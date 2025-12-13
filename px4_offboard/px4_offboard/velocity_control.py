@@ -46,6 +46,7 @@ from px4_msgs.msg import TrajectorySetpoint
 from px4_msgs.msg import VehicleStatus
 from px4_msgs.msg import VehicleAttitude
 from px4_msgs.msg import VehicleCommand
+from px4_msgs.msg import VehicleLocalPosition
 from geometry_msgs.msg import Twist, Vector3
 from math import pi
 from std_msgs.msg import Bool
@@ -86,6 +87,12 @@ class OffboardControl(Node):
             '/arm_message',
             self.arm_message_callback,
             qos_profile)
+        
+        self.local_pos_sub = self.create_subscription(
+            VehicleLocalPosition,
+            '/fmu/out/vehicle_local_position',
+            self.local_position_callback,
+            qos_profile)
 
 
         #Create publishers
@@ -118,6 +125,16 @@ class OffboardControl(Node):
         self.failsafe = False
         self.current_state = "IDLE"
         self.last_state = self.current_state
+        self.have_local_pos = False
+        self.local_x = 0.0
+        self.local_y = 0.0
+        self.local_z = 0.0
+        self.hold_latched = False
+        self.hold_x = 0.0
+        self.hold_y = 0.0
+        self.hold_y = 0.0
+        self.hold_yaw = 0.0
+
 
 
     def arm_message_callback(self, msg):
@@ -130,6 +147,7 @@ class OffboardControl(Node):
 
         match self.current_state:
             case "IDLE":
+                self.hold_latched = False
                 if(self.flightCheck and self.arm_message == True):
                     self.current_state = "ARMING"
                     self.get_logger().info(f"Arming")
@@ -182,7 +200,14 @@ class OffboardControl(Node):
     def state_offboard(self):
         self.myCnt = 0
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 1., 6.)
-        self.offboardMode = True   
+        self.offboardMode = True
+        if (not self.hold_latched) and self.have_local_pos:
+            self.hold_x = float(self.local_x)
+            self.hold_y = float(self.local_y)
+            self.hold_z = float(self.local_z)
+            self.hold_yaw = float(self.trueYaw)
+            self.hold_latched = True
+            self.get_logger().info(f"Latched hold target NED: x={self.hold_x:.2f}, y={self.hold_y:.2f}, z={self.hold_z:.2f}")
 
     # Arms the vehicle
     def arm(self):
@@ -229,6 +254,11 @@ class OffboardControl(Node):
         self.failsafe = msg.failsafe
         self.flightCheck = msg.pre_flight_checks_pass
 
+    def local_position_callback(self, msg):
+        self.local_x = msg.x
+        self.local_y = msg.y
+        self.local_z = msg.z
+        self.have_local_pos = True
 
     #receives Twist commands from Teleop and converts NED -> FLU
     def offboard_velocity_callback(self, msg):
@@ -250,39 +280,57 @@ class OffboardControl(Node):
         self.trueYaw = -(np.arctan2(2.0*(orientation_q[3]*orientation_q[0] + orientation_q[1]*orientation_q[2]), 
                                   1.0 - 2.0*(orientation_q[0]*orientation_q[0] + orientation_q[1]*orientation_q[1])))
         
-    #publishes offboard control modes and velocity as trajectory setpoints
+    #publishes offboard control modes and velocity as trajectory setpoints    
     def cmdloop_callback(self):
-        if(self.offboardMode == True):
-            # Publish offboard control modes
-            offboard_msg = OffboardControlMode()
-            offboard_msg.timestamp = int(Clock().now().nanoseconds / 1000)
-            offboard_msg.position = False
-            offboard_msg.velocity = True
-            offboard_msg.acceleration = False
-            self.publisher_offboard_mode.publish(offboard_msg)            
+            if(self.offboardMode == True):
+                offboard_msg = OffboardControlMode()
+                offboard_msg.timestamp = int(Clock().now().nanoseconds / 1000)
 
-            # Compute velocity in the world frame
-            cos_yaw = np.cos(self.trueYaw)
-            sin_yaw = np.sin(self.trueYaw)
-            velocity_world_x = (self.velocity.x * cos_yaw - self.velocity.y * sin_yaw)
-            velocity_world_y = (self.velocity.x * sin_yaw + self.velocity.y * cos_yaw)
+                offboard_msg.position = True
+                offboard_msg.velocity = False
+                offboard_msg.acceleration = False
+                self.publisher_offboard_mode.publish(offboard_msg)
 
-            # Create and publish TrajectorySetpoint message with NaN values for position and acceleration
-            trajectory_msg = TrajectorySetpoint()
-            trajectory_msg.timestamp = int(Clock().now().nanoseconds / 1000)
-            trajectory_msg.velocity[0] = velocity_world_x
-            trajectory_msg.velocity[1] = velocity_world_y
-            trajectory_msg.velocity[2] = self.velocity.z
-            trajectory_msg.position[0] = float('nan')
-            trajectory_msg.position[1] = float('nan')
-            trajectory_msg.position[2] = float('nan')
-            trajectory_msg.acceleration[0] = float('nan')
-            trajectory_msg.acceleration[1] = float('nan')
-            trajectory_msg.acceleration[2] = float('nan')
-            trajectory_msg.yaw = float('nan')
-            trajectory_msg.yawspeed = self.yaw
+                if not self.hold_latched:
+                    return
+                now = self.get_clock().now().nanoseconds * 1e-9
+                if not hasattr(self, "_last_t"):
+                    self._last_t = now
+                dt = now - self._last_t
+                self._last_t = now
+                dt = float(np.clip(dt, 0.0, 0.1))
+                cos_yaw = np.cos(self.trueYaw)
+                sin_yaw = np.sin(self.trueYaw)
+                v_world_x = (self.velocity.x * cos_yaw - self.velocity.y * sin_yaw)
+                v_world_y = (self.velocity.x * sin_yaw + self.velocity.y * cos_yaw)
+                v_world_z = self.velocity.z
 
-            self.publisher_trajectory.publish(trajectory_msg)
+                self.hold_x += float(v_world_x) * dt
+                self.hold_y += float(v_world_y) * dt
+                self.hold_z += float(v_world_z) * dt
+
+                self.hold_yaw += float(self.yaw) * dt
+                self.hold_yaw = float(np.arctan2(np.sin(self.hold_yaw), np.cos(self.hold_yaw)))
+
+                trajectory_msg = TrajectorySetpoint()
+                trajectory_msg.timestamp = int(Clock().now().nanoseconds / 1000)
+
+                trajectory_msg.position[0] = self.hold_x
+                trajectory_msg.position[1] = self.hold_y
+                trajectory_msg.position[2] = self.hold_z
+
+                trajectory_msg.velocity[0] = float('nan')
+                trajectory_msg.velocity[1] = float('nan')
+                trajectory_msg.velocity[2] = float('nan')
+
+                trajectory_msg.acceleration[0] = float('nan')
+                trajectory_msg.acceleration[1] = float('nan')
+                trajectory_msg.acceleration[2] = float('nan')
+
+                trajectory_msg.yaw = self.hold_yaw
+                trajectory_msg.yawspeed = float(self.yaw)
+
+                self.publisher_trajectory.publish(trajectory_msg)
 
 
 def main(args=None):
