@@ -1,23 +1,28 @@
 
 # Overview
-This tutorial explains at a basic level how to use ROS2 and PX4 in order to control a simulated UAV's velocity with keyboard controls. The goal is to create a simple example that a complete beginner can follow and understand, even with no ROS2 or PX4 experience.
+This repository contains the work done during the TTK4551-Specialization project. Here we aim to control a Quadcopter drone using both the functionallity from the flight control and mission planing software Qgroundcontrol, using the MAVLink protocol. Aswell as usinging the offboar control mode where we can control the PX4 flightstack uning software outside of the autopilot. Using the Offboard control is very dangerous due to the risk of bugs/errors in the offboard control script. Therefore this project aims to create a safe simulation environment to simulate control scripts on an drone using PX4 autopilot in mind, before protentialy implementing it into a companion computer on a real drone. 
 
 This repo is a derivative of Braden Wagstaff's Offboard example
 https://github.com/ARK-Electronics/ROS2_PX4_Offboard_Example
 
-I've taken form his example and added some more functionality. 
+I have taken form his example and added some more functionality such as: 
 
-## ROS2_PX4_Offboard_Example
+
+## YouTube Tutorial
+Braden Wagstaff published a walkthrough tutorial on YouTube to demonstrate the example and to help beginners set up their enviornment. The video was super helpful, but be always sure to defer to this Readme file for instructions. Some changes have been made since the video was posted, meaning that even though it is helpful, it is not 100% accurate.
+You can watch the video [here](https://www.youtube.com/watch?v=8gKIP0OqHdQ).
+
+The tutorial explains at a basic level how to use ROS2 and PX4 in order to control a simulated UAV's velocity with keyboard controls. The goal is to create a simple example that a complete beginner can follow and understand, even with no ROS2 or PX4 experience.
+
+
+### ROS2_PX4_Offboard_Example
 The content of this tutorial was migrated to Custom Modes ad written in C++, you can find it below:
 [ros2_px4_teleop_example 🎛️](https://github.com/ARK-Electronics/ros2_px4_teleop_example/tree/main)
 
-## YouTube Tutorial
-Braden Wagstaff published a walkthrough tutorial on YouTube to demonstrate the example and to help beginners set up their enviornment. The video was super helpful, but be sure to always defer to this Readme file for instructions. Some changes have been made since the video was posted, meaning that though it is helpful, it is not 100% accurate.
-You can watch the video [here](https://www.youtube.com/watch?v=8gKIP0OqHdQ).
-
-### Prerequisites
+## Prerequisites to use the simulator
 * ROS2 Humble
 * Gazebo Fortress
+* QGroundControl
 * PX4 Autopilot
 * Micro XRCE-DDS Agent
 * px4_msgs
@@ -30,6 +35,8 @@ To install ROS2 Humble follow the steps [here](https://docs.ros.org/en/humble/In
 ### Installing Gazebo fortress on your computer
 To install Gazebo fortress follow the steps [here](https://gazebosim.org/docs/fortress/install_ubuntu/)
 
+### Installing QGroundControl on your computer
+To install QGroundControll in ubuntu follow the steps here [here](https://docs.qgroundcontrol.com/Stable_V5.0/en/qgc-user-guide/getting_started/download_and_install.html)
 
 ## Setup Steps
 
@@ -50,7 +57,7 @@ You will now need to restart your computer before continuing.
 
 
 
-### Install Dependencies
+### Installing Dependencies
 
 Install Python dependencies as mentioned in the [PX4 Docs](https://docs.px4.io/main/en/ros/ros2_comm.html#install-ros-2) with the following commands
 
@@ -108,7 +115,7 @@ git clone https://github.com/PX4/px4_msgs.git -b release/1.15
 Once again be sure you are still in the src directory of your workspace. Run this code to clone in our example package
 
 ```
-git clone https://github.com/ARK-Electronics/ROS2_PX4_Offboard_Example.git
+git clone https://github.com/ErikFougnerArnesen/TK4551---Eng-Cybernetics-Specialization-Project
 ```
 
 Run this code to clone the repo
