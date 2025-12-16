@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+__author__ = "Erik Fougner Arnesen"
+__contact__ = "erik.f.arnesen@gmail.com"
+
 import sys
 
 import geometry_msgs.msg
