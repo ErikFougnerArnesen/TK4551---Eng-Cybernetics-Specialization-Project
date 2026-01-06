@@ -32,8 +32,13 @@ setup(
                 'velocity_control = px4_offboard.velocity_control:main',
                 'control = px4_offboard.control:main',
                 'processes = px4_offboard.processes:main',
+                'waypoint_mission = px4_offboard.waypoint_mission:main',
+                'mission_control_terminal = px4_offboard.mission_control_terminal:main',
                 'velocity_control_qgc = px4_offboard.velocity_control_qgc:main',
-                'control_qgc = px4_offboard.control_qgc:main'
+                'mission_qgc = px4_offboard.mission_qgc:main',
+                'control_qgc = px4_offboard.control_qgc:main',
+                'offboard_keepalive = px4_offboard.offboard_keepalive:main',
+
         ],
     },
 )
