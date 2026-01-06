@@ -1,11 +1,14 @@
 
 # Overview
-This repository contains the work done during the TTK4551-Specialization project. Here we aim to control a Quadcopter drone using both the functionallity from the flight control and mission planing software Qgroundcontrol, using the MAVLink protocol. Aswell as usinging the offboar control mode where we can control the PX4 flightstack uning software outside of the autopilot. Using the Offboard control is very dangerous due to the risk of bugs/errors in the offboard control script. Therefore this project aims to create a safe simulation environment to simulate control scripts on an drone using PX4 autopilot in mind, before protentialy implementing it into a companion computer on a real drone. 
+This repository contains the work done during the TTK4551-Specialization project. Here we aim to control a Quadcopter drone using both the functionallity from the flight control and mission planing software Qgroundcontrol, using the MAVLink protocol. Aswell as using the offboar control mode where we can control the PX4 flightstack uning software outside of the autopilot for autonomus flight. Using the Offboard control is very dangerous due to the risk of bugs/errors in the offboard control script. Therefore this project aims to create a safe simulation environment to simulate control scripts on a drone using PX4 autopilot in mind, before protentialy implementing it into a companion computer on a real drone. 
 
 This repo is a derivative of Braden Wagstaff's Offboard example
 https://github.com/ARK-Electronics/ROS2_PX4_Offboard_Example
 
-I have taken form his example and added some more functionality such as: 
+I have taken form his example and added some more functionality such as:
+* connection between Qgroundcontrol 
+* Mission control terminal to launch offboard mode, while giving status updates
+* How to log data from flight and delivering data 
 
 
 ## YouTube Tutorial
@@ -131,7 +134,7 @@ Before we build these two packages, we need to source our ROS2 installation. Run
 source /opt/ros/humble/setup.bash
 ```
 
-This will need to be run in every terminal that wants to run ROS2 commands. An easy way to get around this, is to add this command to your .bashrc file. This will run this command every time you open a new terminal window.
+This must be run every terminal that wants to run ROS2 commands. To get around this, add it to your .bashrc file. Then the command every time you open a new terminal window.
 
 To build these two packages, you must be in workspace directory not in src, run this code to change directory from src to one step back i.e. root of your workspace and build the packages
 
@@ -156,27 +159,15 @@ source install/setup.bash
 We will run this every time we build. It will also need to be run in every terminal that we want to run ROS2 commands in.
 
 
-### Running the Code
+### Running Drone with keyboard commands
 This example has been designed to run from one launch file that will start all the necessary nodes. The launch file will run a python script that uses gnome terminal to open a new terminal window for MicroDDS and Gazebo.
 
-Run this code to start the example
+Run this code to start it
 
 ```
 ros2 launch px4_offboard offboard_velocity_control.launch.py
 ```
-
-This will run numerous things. In no particular order, it will run:
-
-* processes.py in a new window
-   * MicroDDS in a new terminal window
-   * Gazebo will open in a second tab in the same terminal window
-      * Gazebo GUI will open in it's own window
-* control.py in a new window
-   * Sends ROS2 Teleop commands to the /offboard_velocity_cmd topic based on keyboard input
-* RVIZ will open in a new window
-* velocity_control.py runs as it's own node, and is the main node of this example
-
-Once everything is running, you should be able to focus into the control.py terminal window, arm, and takeoff. The controls mimic Mode 2 RC Transmitter controls with WASD being the left joystick and the arrow keys being the right joystick. The controls are as follows:
+Once everything is running, you should be able to focus into the control.py terminal window, arm, and takeoff. The controls mimic Mode 2 RC Transmitter controls with WASD being the left joystick and the arrow keys being the right joystick.
 * W: Up
 * S: Down
 * A: Yaw Left
@@ -187,23 +178,34 @@ Once everything is running, you should be able to focus into the control.py term
 * Right Arrow: Roll Right
 * Space: Arm/Disarm
 
-Pressing *Space* will arm the drone. Wait a moment and it will takeoff and switch into offboard mode. You can now control it using the above keys. If you land the drone, it will disarm and to takeoff again you will need to toggle the arm switch off and back on with the space bar. 
+Pressing *Space* will arm the drone. Wait a moment and it will takeoff and switch into offboard mode. You can now control it using the keyboard keys. landing the drone, it will disarm and to takeoff again you will need to toggle the arm switch off and back on with the space bar. 
 
-Using the controls, click *W* to send a vertical veloctiy command and take off. Once in the air you can control it as you see fit.
+
+### Runnin the waypoint mission Developed
+This will launch the waypoint mission developed during the projet.
+```
+ros2 launch px4_offboard waypoint_mission.launch.py
+```
+Once everything is up and running, press space. Wait a moment and the drone will takeoff -> increase altitude to 100m -> Travel to the predefined latitude and longitude -> hover for 5 seconds -> Return to home location -> Land -> Mission complete
+
+Watch the Mission_control_terminal, it will show a status update of the drone during the mission. It will further provide information such as Altitude and distance from target coordinates.  
 
 ## Closing Simulation *IMPORTANT*
-When closing the simulation, it is very tempting to just close the terminal windows. However, this will leave Gazebo running in the background, potentially causing issues when you run Gazebo in the future. To correctly end the Gazebo simulation, go to it's terminal window and click *Ctrl+C*. This will close Gazebo and all of it's child processes. Then, you can close the other terminal windows.
- 
+When closing the simulation, it is very very important to click *Ctrl+C* on all terminals. THis will close Gazebo and all it's child processes. 
+If you just close the terminal windows, it will cause to leaving gazebo and child processes to run in the background.
+This can cause issues when you want to run Gazebo in the future     
 
- ## Explanation of processes.py
- This code runs each set of bash commands in a new tab of a gnome terminal window. It assumes that your PX4 installation is accessible from your root directory, and it is using the gz_x500 simulation. There is no current implementation to change these commands when running the launch file, however you can modify the command string within processes.py to change these values to what you need.
+## Connecting Qgroundcontrol to simulator
+To connect the ground controll software to the simulator, you will need to go in Qgroundcontrol into:
+Application Settings -> Comm Links
 
- If line 17 of processes.py were uncommented
-```
-17     # "cd ~/QGroundControl && ./QGroundControl.AppImage"
-```
-then QGroundControl would run in a new tab of the terminal window and the QGroundControl GUI would then open up. This is commented out by default because it is not necessary for the simulation to run, but it is useful for debugging, and is a simple example showing how to add another command to the launch file.
+Here make sure to check the UDP checkbox. After that Press 'Add new link' under Links.
+
+Give it then a name you can remember, such as PX4 SITL and give the type of UDP on port 14550. It will then connect automatically to the simulator when you launch. 
+
+## Logging simulator flights
+To log simulator flights got to Application setting again and enter PX4 Log Transfere. You will then need to check 'Enable automatic loggin', then enter you email address you want to recive the link to the log files from PX4 Log review site. I recommend to make the logs publick so you can share them og add them to your rapports. I would also recommend to check 'Enable automatic log uploads', so you do not need to do it manually     
+
 
 ## Known Issues
-If the vehicle does not arm when you press Enter, check to ensure the parameter NAV_DLL_ACT is set to 0. You may need to download QGroundControl and disable this parameter if you want to run this demo without needing QGC open.
-
+If the vehicle does not arm check to ensure the parameter NAV_DLL_ACT is set to 0.
